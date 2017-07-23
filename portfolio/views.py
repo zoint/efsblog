@@ -114,6 +114,22 @@ def investment_list(request):
    return render(request, 'portfolio/investment_list.html', {'investments': investments})
 
 @login_required
+def investment_new(request):
+   if request.method == "POST":
+       form = InvestmentForm(request.POST)
+       if form.is_valid():
+           investment = form.save(commit=False)
+           investment.created_date = timezone.now()
+           investment.save()
+           investments = Investment.objects.filter(recent_date__lte=timezone.now())
+           return render(request, 'portfolio/investment_list.html',
+                         {'investments': investments})
+   else:
+       form = InvestmentForm()
+       # print("Else")
+   return render(request, 'portfolio/investment_new.html', {'form': form})
+
+@login_required
 def investment_edit(request, pk):
    investment = get_object_or_404(Investment, pk=pk)
    if request.method == "POST":
