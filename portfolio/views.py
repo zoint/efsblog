@@ -43,6 +43,21 @@ def customer_delete(request, pk):
    customer.delete()
    return redirect('portfolio:customer_list')
 
+@login_required
+def customer_new(request):
+   if request.method == "POST":
+       form = CustomerForm(request.POST)
+       if form.is_valid():
+           customer = form.save(commit=False)
+           customer.created_date = timezone.now()
+           customer.save()
+           customers = Customer.objects.filter(created_date__lte=timezone.now())
+           return render(request, 'portfolio/customer_list.html',
+                         {'customers': customers})
+   else:
+       form = CustomerForm()
+       # print("Else")
+   return render(request, 'portfolio/customer_new.html', {'form': form})
 
 @login_required
 def stock_list(request):
@@ -98,6 +113,30 @@ def investment_list(request):
    investments = Investment.objects.filter(acquired_date__lte=timezone.now())
    return render(request, 'portfolio/investment_list.html', {'investments': investments})
 
+@login_required
+def investment_edit(request, pk):
+   investment = get_object_or_404(Investment, pk=pk)
+   if request.method == "POST":
+       # update
+       form = InvestmentForm(request.POST, instance=investment)
+       if form.is_valid():
+           investment = form.save(commit=False)
+           investment.updated_date = timezone.now()
+           investment.save()
+           investment = Investment.objects.filter(recent_date__lte=timezone.now())
+           return render(request, 'portfolio/investment_list.html',
+                         {'investments': investment})
+   else:
+       # edit
+       form = InvestmentForm(instance=investment)
+   return render(request, 'portfolio/investment_edit.html', {'form': form})
+
+
+@login_required
+def investment_delete(request, pk):
+   investment = get_object_or_404(Investment, pk=pk)
+   investment.delete()
+   return redirect('portfolio:investment_list')
 
 
 @login_required
