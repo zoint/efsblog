@@ -6,6 +6,10 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.db.models import Sum
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import CustomerSerializer
 
 def home(request):
    return render(request, 'portfolio/home.html',
@@ -171,4 +175,12 @@ def portfolio(request,pk):
                                                       'sum_recent_value': sum_recent_value})
 
 
+# List at the end of the views.py
+# Lists all customers 
+class CustomerList(APIView):
+
+    def get(self,request):
+        customers_json = Customer.objects.all()
+        serializer = CustomerSerializer(customers_json, many=True)
+        return Response(serializer.data)
                                                    
